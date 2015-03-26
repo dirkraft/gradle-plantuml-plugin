@@ -1,11 +1,14 @@
 buildscript {
-    repositories{
+    repositories {
         mavenLocal()
-        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
     }
     dependencies {
         classpath 'com.github.dirkraft.gradle:gradle-plantuml-plugin:0.0.1-SNAPSHOT'
     }
 }
+
 apply plugin: 'PlantUml'
 
