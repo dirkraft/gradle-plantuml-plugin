@@ -1,0 +1,15 @@
+@startuml
+
+title narcissism as a stable configuration
+
+participant enamored as A
+participant enamored as B
+participant narcissist as C
+
+A -> B: likes
+B --> A: no reciprocation
+B -> C: likes
+C --> B: no reciprocation
+C -> C: likes
+C -> C: reciprocated
+@enduml

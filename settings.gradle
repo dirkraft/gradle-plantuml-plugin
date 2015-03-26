@@ -1,1 +1,3 @@
 rootProject.name = 'gradle-plantuml-plugin'
+include 'plugin'
+project(':plugin').name = rootProject.name

@@ -7,4 +7,7 @@ build/
 *.iml
 *.iws
 *.ipr
+out/
 
+# OSX garbage
+.DS_Store

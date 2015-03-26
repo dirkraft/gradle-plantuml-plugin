@@ -82,7 +82,7 @@ ext {
     project_name = 'gradle-plantuml-plugin'
     project_version = '0.0.1-SNAPSHOT'
     project_description = 'Renders PlantUML to image files'
-    project_jdk = '1.6'
+    project_jdk = '1.7'
 
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
@@ -320,7 +320,8 @@ subprojects {
 // Misc
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '2.3'
+    distributionUrl = 'https://services.gradle.org/distributions/gradle-2.3-all.zip'
 }
 
 idea {
