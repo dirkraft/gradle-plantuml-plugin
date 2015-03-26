@@ -1,0 +1,5 @@
+language: groovy
+install: ./gradlew install
+script:
+  - ./gradlew check
+  - ./gradlew -p test renderPlantUml

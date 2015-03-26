@@ -62,7 +62,7 @@ class RenderPlantUmlTask extends DefaultTask {
             reader.generateImage(new FileOutputStream(destPathPng.toFile()), new FileFormatOption(FileFormat.PNG))
         }
 
-        
+
     }
 }
 

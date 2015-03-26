@@ -4,3 +4,7 @@ dependencies {
     compile 'net.sourceforge.plantuml:plantuml:8019'
     compile 'commons-io:commons-io:2.4'
 }
+
+uploadArchives {
+    enabled = true
+}
