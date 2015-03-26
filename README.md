@@ -12,10 +12,10 @@ If you use IntelliJ I also recommend the [PlantUML plugin](https://github.com/es
 ```gradle
 buildscript {
     repositories {
-        mavenCentral() // for PlantUML itself
         maven { // for the plugin
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
+        mavenCentral() // for PlantUML itself
     }
     dependencies {
         classpath 'com.github.dirkraft.gradle:gradle-plantuml-plugin:0.0.1-SNAPSHOT'
