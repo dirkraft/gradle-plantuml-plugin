@@ -30,9 +30,9 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.TaskAction
 
-import java.nio.file.DirectoryStream
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -85,18 +85,23 @@ class RenderPlantUmlTask extends DefaultTask {
             reader.generateImage(new FileOutputStream(destPathPng.toFile()), new FileFormatOption(FileFormat.PNG))
         }
 
-
     }
 }
 
-class CleanPlantUmlTask extends DefaultTask {
+class CleanPlantUmlTask extends Delete {
+
+    def Path assetsPath = project.projectDir.toPath().resolve('assets/')
 
     CleanPlantUmlTask() {
-
+        for (Path puml : Files.newDirectoryStream(assetsPath, '*.puml')) {
+            delete getDestination(puml.toFile(), '.svg').toFile()
+            delete getDestination(puml.toFile(), '.png').toFile()
+        }
     }
 
-    @TaskAction
-    def clean() {
-
+    Path getDestination(File puml, String extension) {
+        String baseName = FilenameUtils.getBaseName(puml.name)
+        String destName = "${baseName}"
+        assetsPath.resolve(destName + extension)
     }
 }
