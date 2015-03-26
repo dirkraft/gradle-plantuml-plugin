@@ -1,5 +1,5 @@
-Gradle PlantUML Pluging
-=======================
+Gradle PlantUML Plugin
+======================
 Renders plant.uml files in a project as part of a gradle build.
 More about [PlantUML on Wikipedia](http://en.wikipedia.org/wiki/PlantUML).
 If you use IntelliJ I also recommend the [PlantUML plugin](https://github.com/esteinberg/plantuml4idea).
@@ -12,10 +12,10 @@ If you use IntelliJ I also recommend the [PlantUML plugin](https://github.com/es
 ```gradle
 buildscript {
     repositories {
+        mavenCentral() // for PlantUML itself
         maven { // for the plugin
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
-        mavenCentral() // for PlantUML itself
     }
     dependencies {
         classpath 'com.github.dirkraft.gradle:gradle-plantuml-plugin:0.0.1-SNAPSHOT'
@@ -25,7 +25,7 @@ buildscript {
 apply plugin: 'PlantUml'
 ```
 
-Place uml files in `assets/` and then
+Place uml files in `${projectDir}/assets/` and then
 
 ```bash
 gradle renderPlantUml
