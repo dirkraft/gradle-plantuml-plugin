@@ -1,0 +1,336 @@
+/*
+This script intends to get you started near instantly on a Gradle, Java, Maven project in IntelliJ on GitHub.
+
+  (1) Copy it into a new directory that will be the root directory of your new project.
+
+  (optional) If you would like the include the Gradle Wrapper in your project, then run `gradle wrapper`. Yeah,
+             you need to already have gradle installed, but for OTHER people they can just use the wrapper. The wrapper
+             avoids gradle version conflicts between your system gradle the build.gradle format (which this assumes
+             Gradle 2.2.1 btw). I have gradle installed and brew switch versions when I need to, so this really is just
+             up to you.
+
+  (2) Personalize the 'Project constants' (see section on Gradle build personalization for more info).
+      You could just skip to step (3) and do this later, but I recommend you go ahead and fill these few details first.
+      It might avoid a few weird new-project nuances. But if you just want to get coding, then procrastinate and get to
+      the part that you are actually excited about. It's fine. http://gunshowcomic.com/648
+
+  (3) Prepare IntelliJ integration.
+
+  (option 1) Run `gradle idea` or `./gradlew idea` and import the .ipr using IDEA's Import Project dialogue. Then
+             whenever you make gradle build changes you just run that again. If you make changes to only a sub-module,
+             then you can run that task within that module's directory to only refresh that particular module's IDEA
+             configuration (.iml). The former will usually prompt IntelliJ to reload the project window. The latter will
+             usually not require a project reload.
+
+  (option 2) Use IDEA's Import Project dialogue on the root directory. If you have prepared the wrapper, tell the
+             dialogues to use it. Then whenever you make gradle build changes, you can click the Refresh all Gradle
+             projects button in the Gradle tool window. This is cool, because it does not usually require a project
+             window reload. But on the downside, this method does not synchronize with your build model as much
+             as the Gradle idea plugin (option 1). Each approach has its advantages and caveats, which you will just
+             have to discover for your own particular situation and style.
+
+Gradle build personalization
+
+  - Review and populate the entire 'Settings' section.
+
+  - If you are not doing a multi-project setup, drop the `allprojects { }` and `subprojects { }` enclosures to apply
+    all of that configuration to the root project. Otherwise the root project should be reserved for build and project
+    utility and should not itself contain any of *the meat* code.
+
+  - If you are using a multi-project setup, create `settings.gradle` with `include 'module1', 'module2', ...`
+
+  - `gradle idea` will generate *.i* IDEA project files. As of IDEA 14,  "import project from external model: gradle"
+    seems to work with this gradle template. Whichever you choose (gradle idea, or IDEA Import Project), stick to it.
+    Do not mix both methods. You will end up with headaches. The gradle plugin and IDEAs integration do not function
+    exactly the same. The gradle plugin is slightly more thorough in preparing IDEA's settings than IDEA's built-in
+    integration.
+
+  - If you want, remove these instructions once you're satisfied with your project fluidity.
+
+Additional features
+
+  - License headers are automatically applied to all applicable source files. The headers' contents are read from
+    src/license/HEADER, which will default to an empty placeholder.
+
+  - Maven artifact publishing settings are bootstrapped with Sonatype-valid 'Maven Central' requirements.
+    See http://central.sonatype.org/pages/requirements.html . Refer to the `uploadArchives { }` section
+    for comments about usage.
+    
+  - Add new subprojects simply by calling them out in settings.gradle: include 'subproject-core', 'subproject-util'.
+    If you using the IDEA Gradle tool window, on refresh the subproject's standard src directories will be created
+    (which is provided by IntelliJ) and an empty build.gradle placed. If using the Gradle IDEA plugin, the subproject
+    directory will be generated with an empty build.gradle, but src directories may not be automatically created.
+
+Automatic mechanics of this build.gradle template
+
+  - Creates the settings.gradle file with `rootProject.name` set to match project constants. Also keeps this value
+    in sync with project constants (if it can).
+
+  - Creates the placeholder src/license/HEADER which will be prepended to all supported file types by most
+    Gradle tasks. The placeholder is blank, so until you stick something in there (like the required Apache2 license
+    header text), nothing will be prepended to your source files. License application is provided by another gradle
+    plugin: https://github.com/hierynomus/license-gradle-plugin
+
+ */
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Settings
+ext {
+    // Project constants
+    github_org = 'dirkraft'
+    project_group = 'com.github.dirkraft.gradle'
+    project_name = 'gradle-plantuml-plugin'
+    project_version = '0.0.1-SNAPSHOT'
+    project_description = 'Renders PlantUML to image files'
+    project_jdk = '1.6'
+
+    /*
+     * Dependencies can be named so that sub-projects can reference consistent version of them.
+     * dependencies {
+     *     compile deps['guava']
+     * }
+     */
+    deps = [
+    ]
+
+    /*
+     * Fine tune the POM contents here, particularly, the developers section. Some defaulting behavior is provided
+     * for all other fields based on project constants.
+     */
+    project_pom = {
+        name project_name
+        description project_description
+        url "https://github.com/${github_org}/${project_name}"
+        licenses {
+            license {
+                name 'MIT License'
+                url 'http://opensource.org/licenses/MIT'
+                distribution 'repo'
+            }
+        }
+        scm {
+            url "https://github.com/${github_org}/${project_name}.git"
+            connection "scm:git:https://github.com/${github_org}/${project_name}.git"
+            developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
+        }
+        organization {
+            name github_org
+            url "https://github.com/${github_org}"
+        }
+        developers {
+            developer {
+                id 'developer'
+                name 'developer'
+            }
+        }
+    }
+
+    /** Function returns a new manifest that can be customized per module */
+    defaultManifest = {
+        return manifest {
+            def git_cmd = "git rev-parse HEAD"
+            def git_proc = git_cmd.execute()
+            attributes 'SCM-Revision': git_proc.text.trim()
+            attributes 'Timestamp': String.valueOf(System.currentTimeMillis())
+            attributes 'Build-Host': InetAddress.localHost.hostName
+        }
+    }
+
+    /** Used where gradle task evaluation would fail because of an undefined value, even if the task wasn't targeted. */
+    defaultBlank = { closure ->
+        try {
+            closure()
+        } catch (MissingPropertyException e) {
+            ''
+        }
+    }
+
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+    }
+}
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'license'
+}
+
+subprojects {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Identifiers
+
+    group = project_group
+    version = project_version
+    ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Plugins
+
+    apply plugin: 'groovy'
+    sourceCompatibility = project_jdk
+    targetCompatibility = project_jdk
+
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+    apply plugin: 'idea'
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // License
+
+    license {
+        header rootProject.file('src/license/HEADER')
+    }
+
+    assemble {
+        dependsOn licenseFormatMain, licenseFormatTest
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dependencies
+
+    repositories {
+        mavenCentral()
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Artifacts
+
+    jar {
+        doFirst {
+            // Timestamp changes on every build. By evaluating it later, won't needlessly fail up-to-date checks.
+            manifest = defaultManifest()
+        }
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from 'build/docs/javadoc'
+        doFirst {
+            // Timestamp changes on every build. By evaluating it later, won't needlessly fail up-to-date checks.
+            manifest = defaultManifest()
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+        doFirst {
+            // Timestamp changes on every build. By evaluating it later, won't needlessly fail up-to-date checks.
+            manifest = defaultManifest()
+        }
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Publishing
+
+    assemble {
+        dependsOn licenseFormatMain, licenseFormatTest
+    }
+
+    signing {
+        required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        dependsOn licenseFormatMain, licenseFormatTest
+        enabled = false // by default. Mark individual projects back to true for inclusion in publishing.
+
+        repositories.mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            //# ./gradlew -PdeployUrl=http://server/artifactory/repo -PdeployUser=admin -PdeployPass=pass uploadArchives
+            // for snapshots https://oss.sonatype.org/content/repositories/snapshots
+            // for staging/release https://oss.sonatype.org/service/local/staging/deploy/maven2
+            repository(
+                    url: defaultBlank({ deployUrl })
+            ) {
+                // If these are not defined assemble needlessly fails for unrelated tasks, hence, defaultBlank.
+                authentication(userName: defaultBlank({ deployUser }), password: defaultBlank({ deployPass }))
+            }
+
+            pom.project project_pom
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Automatics (a.k.a. Ugly-But-Useful stuff)
+
+// Create placeholder if this is a brand new project.
+boolean createdLicenseDir = rootProject.file('src/license').mkdirs()
+createdLicenseDir && logger.info('Created src/license/')
+boolean createdLicensePlaceholder = rootProject.file('src/license/HEADER').createNewFile()
+createdLicensePlaceholder && logger.info('Created src/license/HEADER placeholder')
+
+// Create and maintain settings.gradle rootProject.name
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.util.regex.Pattern
+
+def settingsPath = rootProject.file('settings.gradle').toPath()
+def settingsRootProjectName = "rootProject.name = '${project_name}'" + System.getProperty("line.separator")
+if (settingsPath.toFile().exists()) {
+    // Make sure name is in sync with project constants.
+    def settings = new String(Files.readAllBytes(settingsPath), StandardCharsets.UTF_8)
+    if (!settings.contains(settingsRootProjectName)) {
+        def matcher = Pattern.compile('\\s*rootProject\\.name\\s*=\\s*[^\\s]+').matcher(settings)
+        if (matcher.find()) {
+            def sb = new StringBuffer();
+            matcher.appendReplacement(sb, settingsRootProjectName).appendTail(sb)
+            settings = sb.toString()
+        } else {
+            settings = settingsRootProjectName + System.getProperty("line.separator") + settings
+        }
+        Files.write(settingsPath, settings.getBytes(StandardCharsets.UTF_8))
+        logger.info('Updated settings.gradle with current ext.project_name which is ${project_name}')
+    }
+} else {
+    // Create settings.gradle if this is a brand new project. This is also the only way I know of (which is to do it in
+    // settings.gradle) to set an explicit name, rather than infer it from the title of the root directory.
+    Files.write(settingsPath, settingsRootProjectName.getBytes(StandardCharsets.UTF_8))
+    logger.info('Created settings.gradle with ${settingsRootProjectName}')
+}
+
+// Touch build.gradle files for all projects. Convenient when adding new modules.
+subprojects {
+    project.projectDir.mkdirs()
+    def projectBuildGradleFile = project.file('build.gradle')
+    if (!projectBuildGradleFile.exists()) {
+        projectBuildGradleFile.createNewFile()
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Misc
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2.1'
+}
+
+idea {
+    module {
+        downloadSources = true
+    }
+    project {
+        jdkName = project_jdk
+        languageLevel = project_jdk
+        vcs = 'Git'
+    }
+}
+
