@@ -3,8 +3,6 @@ env:
   global:
     - secure: "bsDoUhqLag1ViSnxf7AIiscbEnbW86c0eVA47k5ZxHrf51G4mn3u9HaCd4CMu36wNP3MnSeT2ENPS8+wmY26c4yPGmXNLlvaoRZFtj/I1V3L2NUMRIdfaOTqEfCXPk8mLmR7UJYEglvF9VnuOIn+C7hdvS+acyjLMX2X1FcKVYU="
     - secure: "X2e5+em3GAo6pSCUnMorxg/jqPNjB4t5PudXXq2ftXVvw57xMHzt//NRFOOdiwVDb5dDzEYmy4yI8kd8BBIlmS2C4uk1UPZwhviCsAuWZepe/LWikqSUIHhrhsNY/3iwzIu0E5hNHqbMzzhQB8r1gLzJ4uguBAcbCfmmjRCVBPM="
-install: ./gradlew install
-script:
-  - ./gradlew check
-  - ./gradlew -p test renderPlantUml
+install: ./gradlew --info --stacktrace check install
+script: ./gradlew -p test --info --stacktrace renderPlantUml
 after_success: ./gradlew -PdeployUrl=https://oss.sonatype.org/content/repositories/snapshots/ -PdeployPass=${SNAPSHOT_PW} -PdeployUser=${SNAPSHOT_US}
