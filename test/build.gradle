@@ -4,6 +4,7 @@ buildscript {
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
+        mavenCentral() // for PlantUML itself
     }
     dependencies {
         classpath 'com.github.dirkraft.gradle:gradle-plantuml-plugin:0.0.1-SNAPSHOT'
