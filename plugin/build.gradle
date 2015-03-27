@@ -1,8 +1,8 @@
 dependencies {
     compile gradleApi()
     compile 'org.codehaus.groovy:groovy:2.4.2'
-    compile 'net.sourceforge.plantuml:plantuml:8021'
     compile 'commons-io:commons-io:2.4'
+    compile 'net.sourceforge.plantuml:plantuml:8021'
 }
 
 uploadArchives {
