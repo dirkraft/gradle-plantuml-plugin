@@ -4,8 +4,6 @@ Renders plant.uml files in a project as part of a gradle build.
 More about [PlantUML on Wikipedia](http://en.wikipedia.org/wiki/PlantUML).
 If you use IntelliJ I also recommend the [PlantUML plugin](https://github.com/esteinberg/plantuml4idea).
 
-[![Build Status](https://travis-ci.org/dirkraft/gradle-plantuml-plugin.svg?branch=master)](https://travis-ci.org/dirkraft/gradle-plantuml-plugin)
-
 
 ## Usage ##
 
