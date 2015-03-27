@@ -5,7 +5,7 @@ ext {
     github_org = 'dirkraft'
     project_group = 'com.github.dirkraft.gradle'
     project_name = 'gradle-plantuml-plugin'
-    project_version = '0.0.1'
+    project_version = '0.0.2-SNAPSHOT'
     project_description = 'Renders PlantUML to image files'
     project_jdk = '1.7'
 
